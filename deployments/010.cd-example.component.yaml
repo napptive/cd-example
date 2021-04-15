@@ -1,0 +1,28 @@
+apiVersion: core.oam.dev/v1alpha2
+kind: Component
+metadata:
+  name: cd-example
+spec:
+  workload:
+    apiVersion: core.oam.dev/v1alpha2
+    kind: ContainerizedWorkload
+    metadata:
+      name: cd-example
+    spec:
+      osType: linux
+      containers:
+        - name: cd-example
+          securityContext:
+            runAsUser: 1001
+          image: TARGET_DOCKER_REGISTRY/cd-example:VERSION
+          imagePullPolicy: Always
+          resources:
+            cpu:
+              required: 150m
+            memory:
+              required: 256Mi
+          ports:
+            - name: http
+              value: 8080
+              containerPort: 8080
+              type: tcp

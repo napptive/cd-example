@@ -1,0 +1,24 @@
+apiVersion: core.oam.dev/v1alpha2
+kind: ApplicationConfiguration
+metadata:
+  name: cd-example
+  annotations:
+    version: 1.0.0
+    description: "A simple application to illustrate continous deployment on the NAPPTIVE Playground"
+spec:
+  components:
+    - componentName: cd-example
+      traits:
+        - trait:
+            apiVersion: core.napptive.com/v1alpha1
+            kind: Ingress
+            metadata:
+              name: cd-example-ingress
+            spec:
+              name: cd-example
+              protocol: HTTP
+              port: 8080
+              path: /
+              rewritePath: /
+
+
