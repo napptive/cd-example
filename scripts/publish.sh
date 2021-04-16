@@ -8,8 +8,8 @@ else
 fi
 
 echo "Downloading NAPPTIVE Playground CLI"
-curl -O https://storage.googleapis.com/artifacts.playground.napptive.dev/linux/playground/playground_v1.0.0-rc3.tgz
-tar --strip-components=1 -zxf playground_v1.0.0-rc3.tgz
+curl -O https://storage.googleapis.com/artifacts.playground.napptive.dev/linux/playground/playground_v1.0.0-rc4.tgz
+tar --strip-components=1 -zxf playground_v1.0.0-rc4.tgz
 chmod +x playground
 
 echo "Downloading Kubectl"
