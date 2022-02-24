@@ -1,7 +1,5 @@
 name: Publish docker image, and update deployed application
-on:
-  push:
-    branches: [main]
+on: workflow_dispatch
 env:
   PLAYGROUND_PAT: ${{ secrets.PLAYGROUND_PAT}}
 jobs:
