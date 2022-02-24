@@ -28,8 +28,11 @@ jobs:
         env:
           VERSION: latest
           TARGET_DOCKER_REGISTRY: cdelope
-      - name: Deploy the app
-        - uses: napptive-actions/playground-github-action@v2.2.1
+
+      - name: Push the application in the catalog
+        uses: napptive-actions/catalog-push-action@v2.2.1
         with:
-          cmd: "apps deploy ./build/k8s/"
-      
+          applicationPath: ./build/k8s/
+          namespace: "cdelope"
+          applicationName: "cd-example"
+          tag: "v0.1.0"
