@@ -1,0 +1,38 @@
+name: Publish docker image, and update the application in the catalog
+on: workflow_dispatch
+env:
+  PLAYGROUND_PAT: ${{ secrets.PLAYGROUND_PAT}}
+jobs:
+  build:
+    name: Push docker images & deploy new version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.15
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Docker Login
+        uses: docker/login-action@v1
+        with:
+          username: ${{secrets.DOCKER_HUB_USER}}
+          password: ${{secrets.DOCKER_HUB_TOKEN}}
+      - name: Build and push Docker images
+        run: make docker-push
+        env:
+          VERSION: latest
+          TARGET_DOCKER_REGISTRY: cdelope
+      - name: Render Kubernetes OAM files
+        run: make k8s
+        env:
+          VERSION: latest
+          TARGET_DOCKER_REGISTRY: cdelope
+
+      - name: Push the application in the catalog
+        uses: napptive-actions/catalog-push-action@v2.2.1
+        with:
+          applicationPath: ./build/k8s/
+          namespace: "cdelope"
+          applicationName: "cd-example"
+          tag: "v0.1.0"
