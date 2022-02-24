@@ -28,7 +28,7 @@ const (
 	// DefaultPort where the HTTP server will be launched.
 	DefaultPort = 8080
 	// DefaultMessage to be returned on HTTP calls.
-	DefaultMessage = "Hello from version %s commit %s"
+	DefaultMessage = "Hello from version %s commit %s - modified"
 )
 
 // Version of the command
