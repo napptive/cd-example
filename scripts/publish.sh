@@ -17,7 +17,7 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 chmod +x kubectl
 
 echo "Login into NAPPTIVE Playground"
-./playground login --pat --loginURL=https://development.napptive.dev/oauth/login?source=cli --serverAddress=api.development.napptive.dev
+./playground login --pat --loginURL=https://development.napptive.dev/oauth/login?source=cli --serverAddress=api.development.napptive.dev --debug
 
 echo "Obtaining kube-config"
 ./playground get-kubeconfig --loginURL=https://development.napptive.dev/oauth/login?source=cli --serverAddress=api.development.napptive.dev
