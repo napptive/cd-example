@@ -147,6 +147,7 @@ k8s:
 		rm -r $(K8S_FOLDER) || true ; \
 		mkdir -p $(K8S_FOLDER); \
 		cp deployments/*.yaml $(K8S_FOLDER)/. ; \
+		cp deployments/README.md $(K8S_FOLDER)/. ; \
 		$(SED) -i 's/TARGET_DOCKER_REGISTRY/'$(TARGET_DOCKER_REGISTRY)'/' $(K8S_FOLDER)/*.yaml ;\
 		$(SED) -i 's/VERSION/$(VERSION)/' $(K8S_FOLDER)/*.yaml ;\
 		echo "Kubernetes OAM files ready at $(K8S_FOLDER)/"; \
