@@ -17,13 +17,13 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 chmod +x kubectl
 
 echo "Login into NAPPTIVE Playground"
-./playground login --pat
+./playground login --pat --loginURL=https://development.napptive.dev/oauth/login?source=cli --serverAddress=api.development.napptive.dev
 
 echo "Obtaining kube-config"
-./playground get-kubeconfig
+./playground get-kubeconfig --loginURL=https://development.napptive.dev/oauth/login?source=cli --serverAddress=api.development.napptive.dev
 
 echo "Deploying latest versions"
-./playground cluster info
+./playground cluster info --loginURL=https://development.napptive.dev/oauth/login?source=cli --serverAddress=api.development.napptive.dev
 export PATH=$PATH:$(pwd)
 echo "Checking if application needs to be deployed"
 ./kubectl --kubeconfig napptive-kubeconfig get applicationconfigurations.core.oam.dev cd-example

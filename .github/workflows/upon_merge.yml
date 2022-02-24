@@ -24,12 +24,12 @@ jobs:
         run: make docker-push
         env:
           VERSION: latest
-          TARGET_DOCKER_REGISTRY: napptive
+          TARGET_DOCKER_REGISTRY: cdelope
       - name: Render Kubernetes OAM files
         run: make k8s
         env:
           VERSION: latest
-          TARGET_DOCKER_REGISTRY: napptive
+          TARGET_DOCKER_REGISTRY: cdelope
       - name: Make scripts executable
         run: chmod +x ./scripts/*.sh
       - name: Deploy new version of the application
