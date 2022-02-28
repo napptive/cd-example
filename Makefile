@@ -91,7 +91,7 @@ build-linux: $(addsuffix .linux,$(BUILD_TARGETS))
 
 # Trigger the build operation for linux. Notice that the suffix is removed as it is only used for Makefile expansion purposes.
 %.linux:
-	@ echo "Building linux binary $@"
+	@echo "Building linux binary $@"
 	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO_BUILD) $(GO_LDFLAGS) -o $(BIN_FOLDER)/linux/$(basename $@) ./cmd/$(basename $@)/main.go
 
 .PHONY: artifacts
@@ -114,13 +114,15 @@ artifacts: clean $(addsuffix .pkg-darwin,$(BUILD_TARGETS)) $(addsuffix .pkg-linu
 .PHONY: docker-prep
 docker-prep: $(addsuffix .docker-prep, $(BUILD_TARGETS))
 %.docker-prep: %.linux
-	@if [ -f docker/$(basename $@)/Dockerfile ]; then\
-		echo "Preparing docker file for "$(basename $@);\
-		rm -r $(DOCKER_FOLDER)/$(basename $@) || true;\
-		mkdir -p $(DOCKER_FOLDER)/$(basename $@);\
-		cp docker/$(basename $@)/* $(DOCKER_FOLDER)/$(basename $@)/.;\
-		cp $(BIN_FOLDER)/linux/$(basename $@) $(DOCKER_FOLDER)/$(basename $@)/.;\
-	fi
+	@echo "Preparing docker file for "$(basename $@);
+	@rm -r $(DOCKER_FOLDER)/$(basename $@) || true;
+	@mkdir -p $(DOCKER_FOLDER)/$(basename $@);
+	@cp docker/$(basename $@)/* $(DOCKER_FOLDER)/$(basename $@)/.;
+	@mkdir -p $(DOCKER_FOLDER)/$(basename $@)/assets;
+	@cp -R assets/* $(DOCKER_FOLDER)/$(basename $@)/assets;
+	@cp -R cmd/* $(DOCKER_FOLDER)/$(basename $@)/cmd;
+	@cp  go.* $(DOCKER_FOLDER)/$(basename $@)/;
+	@cp  Makefile* $(DOCKER_FOLDER)/$(basename $@)/;
 
 .PHONY: docker-build
 docker-build: $(addsuffix .docker-build, $(BUILD_TARGETS))
@@ -128,7 +130,7 @@ docker-build: $(addsuffix .docker-build, $(BUILD_TARGETS))
 %.docker-build: %.docker-prep
 	@if [ -f $(DOCKER_FOLDER)/$(basename $@)/Dockerfile ]; then\
 		echo "Building docker file for "$(basename $@);\
-		$(DOCKERCMD) build $(DOCKER_FOLDER)/$(basename $@) -t $(TARGET_DOCKER_REGISTRY)/$(basename $@):$(VERSION);\
+		$(DOCKERCMD) build --build-arg VERSION=$(VERSION) $(DOCKER_FOLDER)/$(basename $@) -t $(TARGET_DOCKER_REGISTRY)/$(basename $@):$(VERSION);\
 	fi
 
 .PHONY: docker-push
@@ -147,6 +149,7 @@ k8s:
 		rm -r $(K8S_FOLDER) || true ; \
 		mkdir -p $(K8S_FOLDER); \
 		cp deployments/*.yaml $(K8S_FOLDER)/. ; \
+		cp deployments/README.md $(K8S_FOLDER)/. ; \
 		$(SED) -i 's/TARGET_DOCKER_REGISTRY/'$(TARGET_DOCKER_REGISTRY)'/' $(K8S_FOLDER)/*.yaml ;\
 		$(SED) -i 's/VERSION/$(VERSION)/' $(K8S_FOLDER)/*.yaml ;\
 		echo "Kubernetes OAM files ready at $(K8S_FOLDER)/"; \
