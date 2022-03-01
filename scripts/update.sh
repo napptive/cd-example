@@ -18,6 +18,5 @@ echo "Login into NAPPTIVE Playground"
 playground login --pat 
 
 export PATH=$PATH:$(pwd)
-echo "Checking if application needs to be deployed"
 echo "Forcing rolling update to download newest image"
 kubectl --kubeconfig napptive-kubeconfig patch deployment cd-example -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"CI-updated\":\"`date +'%s'`\"}}}}}"

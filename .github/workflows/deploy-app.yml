@@ -24,23 +24,22 @@ jobs:
       - name: Build and push Docker images
         run: make docker-push
         env:
-          VERSION: latest
           TARGET_DOCKER_REGISTRY: cdelope
       
       # Build k8s yaml
       - name: Render Kubernetes OAM files
         run: make k8s
         env:
-          VERSION: latest
           TARGET_DOCKER_REGISTRY: cdelope
-
+  
       # Create an artifact      
       - name: Uploading manifest
         id: cache-k8s
         uses: actions/cache@v2
         with:
           key: k8s-yaml
-          path: ./build/
+          path: ./build/*
+
       
   check-app:
     needs: build
@@ -112,9 +111,9 @@ jobs:
       uses: actions/cache@v2
       id: cache-k8s
       with:
-        path: ./build/
+        path: ./build/*
         key: k8s-yaml
-    
+
     # create it!
     - name: Deploy the app       
       uses: napptive-actions/playground-github-action@v2.2.1

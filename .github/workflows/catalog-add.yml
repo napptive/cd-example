@@ -18,20 +18,21 @@ jobs:
         with:
           username: ${{secrets.DOCKER_HUB_USER}}
           password: ${{secrets.DOCKER_HUB_TOKEN}}
+      - name: Get Version
+        id: version
+        run: echo "::set-output name=version::$(cat VERSION)"
       - name: Build and push Docker images
         run: make docker-push
         env:
-          VERSION: latest
           TARGET_DOCKER_REGISTRY: cdelope
       - name: Render Kubernetes OAM files
         run: make k8s
         env:
-          VERSION: latest
-          TARGET_DOCKER_REGISTRY: cdelope
+          TARGET_DOCKER_REGISTRY: cdelope          
       - name: Push the application on the catalog
         uses: napptive-actions/catalog-push-action@v2.2.1
         with:
           applicationPath: ./build/k8s/
           namespace: "cdelope"
           applicationName: "cd-example"
-          tag: "v0.1.0"
+          tag: ${{ steps.version.outputs.version }}

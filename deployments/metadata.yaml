@@ -1,0 +1,14 @@
+apiVersion: core.napptive.com/v1alpha1
+kind: ApplicationMetadata
+name: "CD Example"
+version: VERSION
+description: Example for CD Using Napptive platform
+keywords:
+  - "storage"
+license: "Apache License Version 2.0"
+url: "https://napptive.com/"
+doc: "https://github.com/napptive/cd-example"
+logo:
+  - src: "https://storage.googleapis.com/artifacts.playground.napptive.dev/logos/napptive.png"
+    type: "image/png"
+    size: "75x87"

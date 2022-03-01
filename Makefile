@@ -6,7 +6,8 @@ include Makefile.const
 BUILD_TARGETS?=$(CURRENT_BIN_TARGETS)
 
 #Version must be overrided in the CI 
-VERSION?=local
+# VERSION?=local
+VERSION=$(shell cat version)
 
 # Docker options
 TARGET_DOCKER_REGISTRY ?= $$USER
@@ -81,7 +82,7 @@ build-linux: $(addsuffix .linux,$(BUILD_TARGETS))
 
 # Trigger the build operation for the local environment. Notice that the suffix is removed.
 %.local:
-	@echo "Building local binary $@"
+	@echo "Building local binary $@"	
 	@$(GO_BUILD) $(GO_LDFLAGS) -o $(BIN_FOLDER)/local/$(basename $@) ./cmd/$(basename $@)/main.go
 
 # Trigger the build operation for darwin. Notice that the suffix is removed as it is only used for Makefile expansion purposes.
@@ -123,7 +124,7 @@ docker-prep: $(addsuffix .docker-prep, $(BUILD_TARGETS))
 	@cp -R cmd/* $(DOCKER_FOLDER)/$(basename $@)/cmd;
 	@cp  go.* $(DOCKER_FOLDER)/$(basename $@)/;
 	@cp  Makefile* $(DOCKER_FOLDER)/$(basename $@)/;
-
+	
 .PHONY: docker-build
 docker-build: $(addsuffix .docker-build, $(BUILD_TARGETS))
 
