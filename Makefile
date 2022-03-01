@@ -124,6 +124,7 @@ docker-prep: $(addsuffix .docker-prep, $(BUILD_TARGETS))
 	@cp -R cmd/* $(DOCKER_FOLDER)/$(basename $@)/cmd;
 	@cp  go.* $(DOCKER_FOLDER)/$(basename $@)/;
 	@cp  Makefile* $(DOCKER_FOLDER)/$(basename $@)/;
+	@cp  version* $(DOCKER_FOLDER)/$(basename $@)/;
 	
 .PHONY: docker-build
 docker-build: $(addsuffix .docker-build, $(BUILD_TARGETS))
