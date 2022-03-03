@@ -8,7 +8,6 @@ Cloud Native applications benefit from having a consolidated Continuous Integrat
 
 ![CD workflow](images/workflow.png)
 
-
 In this example we will explore how to create a GitHub Action that is triggered every time a pull request is submitted (or a change to the main branch is pushed). The Action will produce the required manifest after pushing the newer docker image, and will trigger the deployment or update of the existing application in the [NAPPTIVE Playground](https://napptive.com/playground).
 
 ## The target application
@@ -17,12 +16,12 @@ For the purpose of this example, we have create a very simple golang application
 
 **[main.go](cmd/cd-example/main.go)**
 
-```
+```go
 ...
 // HelloHandler will return 200 OK plus a message.
 func (s *SimpleHTTPServer) HelloHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, fmt.Sprintf(DefaultMessage, Version, Commit))
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprint(w, fmt.Sprintf(DefaultMessage, Version, Commit))
 }
 ...
 ```
@@ -31,7 +30,7 @@ To deploy the application in Kubernetes, we use the Open Application Model to si
 
 **[application.yaml](deployments/020.cd-example.appconfig.yaml)**
 
-```
+```yaml
 apiVersion: core.oam.dev/v1alpha2
 kind: ApplicationConfiguration
 metadata:
@@ -55,12 +54,13 @@ spec:
               path: /
               rewritePath: /
 ```
+
 Notice that the application defines which components are part of our application, and in this case applies a trait to expose the application to the outside. This will generate a public endpoint that we can connect to. The application entity references a [component](deployments/010.cd-example.component.yaml) that defines how to run the application.
 
 <details>
 <summary>component</summary>
 
-```
+```yaml
 apiVersion: core.oam.dev/v1alpha2
 kind: Component
 metadata:
@@ -97,16 +97,15 @@ spec:
 
 For the [GitHub Action](https://github.com/features/actions), we define one that is triggered by a merge operation following the classic git approach for submitting new code to a repository. The [action](.github/workflows/upon_merge.yml) executes the following workflow:
 
-
 ![Action workflow](images/action.png)
 
 * **Setup Go environment** and **Checkout code** are standard operations to get the code that has been submitted on an environment with the required development tools.
 
 * **Publish docker images and create manifest** builds the docker image and pushes it to [Docker Hub](hub.docker.com) using your credentials. The action expect the credentials to be stored in secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`. After that, builds the YAML files that are required to deploy the application. This operation uses two environment variables `VERSION` and `TARGET_DOCKER_REGISTRY` to define where the image will be pushed and which version will be associated with the upload. **Edit the action code to substitute the value with your user.***
 
-* **Push the application to the catalog** upload the new application to Napptive Catalog.
+* **Push the application to the catalog** upload the new application to Napptive Catalog using `napptive-actions/catalog-push-action@v2.2.2` action
 
-* **Check the application** Checks if the applcation is already deployed using `napptive-actions/catalog-push-action@v2.2.2` action.
+* **Check the application** Checks if the applcation is already deployed using `napptive-actions/playground-github-action@v2.2.2` action.
 
 * **Deploy the application** If the application is not deployed yet, deploy it using `napptive-actions/playground-github-action@v2.2.2` action.
 
@@ -127,7 +126,7 @@ The result of the workflow is:
 
 Once the action has been executed, you can connect to the [NAPPTIVE Playground](https://playground.napptive.dev) and you will see your application running. Now try to change the message in [cmd/cd-example/main.go:31](cmd/cd-example/main.go)
 
-```bash
+```go
 const (
   // DefaultPort where the HTTP server will be launched.
   DefaultPort = 8080

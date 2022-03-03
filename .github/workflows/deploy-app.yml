@@ -36,7 +36,7 @@ jobs:
         env:
           TARGET_DOCKER_REGISTRY: napptive  
 
-      # Create an artifact      
+      # Create a cache  
       - name: Uploading manifest
         id: cache-k8s
         uses: actions/cache@v2
