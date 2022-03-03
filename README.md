@@ -99,25 +99,15 @@ For the [GitHub Action](https://github.com/features/actions), we define one that
 
 <!-- [Setup Go environment]->[Checkout code]->[docker login]->[make docker-push]->[make k8s]->[Deploy on Playground] -->
 
-
 ![Action workflow](images/action.png)
 
 * **Setup Go environment** and **Checkout code** are standard operations to get the code that has been submitted on an environment with the required development tools.
 * **docker login** is an operation that authenticates against [Docker Hub](hub.docker.com) using your credentials. The action expect the credentials to be stored in secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`.
 * **make docker-push** builds the docker image and pushes it to docker hub.
 * **make k8s** builds the YAML files that are required to deploy the application. This operation uses two environment variables `VERSION` and `TARGET_DOCKER_REGISTRY` to define where the image will be pushed and which version will be associated with the upload. **Edit the action code to substitute the value with your user.***
-* **Deploy on Playground** is achieved by invoking the [publish.sh](scripts/publish.sh) script.
+* **Deploy or update on Playground** deploy the application or update if it already exists by invoking the [update.sh](scripts/update.sh) script.
 
-## The integration with the NAPPTIVE Playground
-
-To simplify development, the code associated with how an action can integrate with the playground has been moved to the [publish.sh](scripts/publish.sh) script. The script performs the following operations:
-
-1. Check that the `PLAYGROUND_PAT` environment variable has been set. You need to define a Personal Access Token to allow scripts to authenticate with your user. The next section will provide with details on how to generate a new PAT.
-2. Downloads the playground CLI as required to perform the login operation and the retrieval of the kubeconfig.
-3. Downloads kubectl to be able to use the standard Kubernetes interface.
-4. Logs into the Playground using a Personal Access Token.
-5. Retrieves the kubeconfig file that will give you access to your cluster.
-6. Retrieves information about the deployed application. If the application is not present, it will trigger the deployment. If the application is already deployed, it will trigger a rolling update.
+![Github Action](images/github-action.png)
 
 ## Trying the example
 
