@@ -1,4 +1,4 @@
-name: Publish docker image, and update the application in the catalog
+name: Publish docker image, and update the deployed application
 on: workflow_dispatch
 env:
   PLAYGROUND_PAT: ${{ secrets.PLAYGROUND_PAT}}
@@ -30,16 +30,15 @@ jobs:
       - name: Render Kubernetes OAM files
         run: make k8s
         env:
-          TARGET_DOCKER_REGISTRY: cdelope
-  
+          TARGET_DOCKER_REGISTRY: cdelope  
+
       # Create an artifact      
       - name: Uploading manifest
         id: cache-k8s
         uses: actions/cache@v2
         with:
-          key: k8s-yaml
+          key: k8s-yaml-${{ github.sha }}
           path: ./build/*
-
       
   check-app:
     needs: build
@@ -83,7 +82,7 @@ jobs:
       id: cache-k8s
       with:
         path: ./build/
-        key: k8s-yaml
+        key: k8s-yaml-${{ github.sha }}
     
     # if the application aready exists -> update it
     - name: Make scripts executable
@@ -94,8 +93,16 @@ jobs:
       with:
         cmd: "get-kubeconfig" 
 
+    # Get version
+    - name: Get Version
+      id: version
+      run: echo "::set-output name=version::$(cat version)"
+    
     - name: Deploy new version of the application
       run: ./scripts/update.sh
+      env:
+        TARGET_DOCKER_REGISTRY: cdelope
+        VERSION: ${{ steps.version.outputs.version }}
 
   deploy-app:
     name: Deploy application
@@ -112,7 +119,7 @@ jobs:
       id: cache-k8s
       with:
         path: ./build/*
-        key: k8s-yaml
+        key: k8s-yaml-${{ github.sha }}
 
     # create it!
     - name: Deploy the app       

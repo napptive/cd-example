@@ -18,5 +18,9 @@ echo "Login into NAPPTIVE Playground"
 playground login --pat 
 
 export PATH=$PATH:$(pwd)
+
 echo "Forcing rolling update to download newest image"
-kubectl --kubeconfig napptive-kubeconfig patch deployment cd-example -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"CI-updated\":\"`date +'%s'`\"}}}}}"
+IMAGE="${TARGET_DOCKER_REGISTRY}/cd-example:${VERSION}"
+echo "Update image... ${IMAGE}"
+PATCH="{\"spec\":{\"workload\":{\"spec\":{\"containers\": [{\"name\":\"cd-example\", \"image\":\"${IMAGE}\"}]}}}}"
+kubectl --kubeconfig napptive-kubeconfig patch component cd-example -p "${PATCH}" --type=merge
