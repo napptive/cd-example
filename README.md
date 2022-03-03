@@ -97,15 +97,22 @@ spec:
 
 For the [GitHub Action](https://github.com/features/actions), we define one that is triggered by a merge operation following the classic git approach for submitting new code to a repository. The [action](.github/workflows/upon_merge.yml) executes the following workflow:
 
-<!-- [Setup Go environment]->[Checkout code]->[docker login]->[make docker-push]->[make k8s]->[Deploy on Playground] -->
 
 ![Action workflow](images/action.png)
 
 * **Setup Go environment** and **Checkout code** are standard operations to get the code that has been submitted on an environment with the required development tools.
-* **docker login** is an operation that authenticates against [Docker Hub](hub.docker.com) using your credentials. The action expect the credentials to be stored in secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`.
-* **make docker-push** builds the docker image and pushes it to docker hub.
-* **make k8s** builds the YAML files that are required to deploy the application. This operation uses two environment variables `VERSION` and `TARGET_DOCKER_REGISTRY` to define where the image will be pushed and which version will be associated with the upload. **Edit the action code to substitute the value with your user.***
-* **Deploy or update on Playground** deploy the application or update if it already exists by invoking the [update.sh](scripts/update.sh) script.
+
+* **Publish docker images and create manifest** builds the docker image and pushes it to [Docker Hub](hub.docker.com) using your credentials. The action expect the credentials to be stored in secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`. After that, builds the YAML files that are required to deploy the application. This operation uses two environment variables `VERSION` and `TARGET_DOCKER_REGISTRY` to define where the image will be pushed and which version will be associated with the upload. **Edit the action code to substitute the value with your user.***
+
+* **Push the application to the catalog** upload the new application to Napptive Catalog.
+
+* **Check the application** Checks if the applcation is already deployed using `napptive-actions/catalog-push-action@v2.2.2` action.
+
+* **Deploy the application** If the application is not deployed yet, deploy it using `napptive-actions/playground-github-action@v2.2.2` action.
+
+* **Update the application** If the application already exists, update it to the new version invoking the [update.sh](scripts/update.sh) script.
+
+The result of the workflow is:
 
 ![Github Action](images/github-action.png)
 
@@ -113,20 +120,19 @@ For the [GitHub Action](https://github.com/features/actions), we define one that
 
 1. Navigate to [https://github.com/napptive/cd-example](https://github.com/napptive/cd-example) and fork the example to your own repository by clicking on the `Fork` icon on the top right of the GitHub page.
 2. Edit [go.mod](go.mod) and replace `github.com/napptive/cd-example` with `github.com/<your_username>/cd-example`.
-3. Execute `$ make build` locally to confirm that your are able to compile the code.
-4. Generate a [Personal Access Token](https://docs.napptive.com/guides/04.5.Using_personal_access_tokens.html) and save the results in a secret called `PLAYGROUND_PAT`. Make sure the repository can access the value of the secret in case you are using an organization one.
-5. Generate Docker [Access Tokens](https://docs.docker.com/docker-hub/access-tokens/) and store the resulting values in two secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`.
-6. Edit [.github/workflows/upon_merge.yml](.github/workflows/upon_merge.yml) and modify the value of `TARGET_DOCKER_REGISTRY` with your docker username.
-7. Submit your changes to your repository, accept the PR if you are using this approach, and check the triggered action.
+3. Generate a [Personal Access Token](https://docs.napptive.com/guides/04.5.Using_personal_access_tokens.html) and save the results in a secret called `PLAYGROUND_PAT`. Make sure the repository can access the value of the secret in case you are using an organization one.
+4. Generate Docker [Access Tokens](https://docs.docker.com/docker-hub/access-tokens/) and store the resulting values in two secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`.
+5. Edit [.github/workflows/deploy-app.yml](.github/workflows/deploy-app.yml) and modify the value of `TARGET_DOCKER_REGISTRY` with your docker username.
+6. Submit your changes to your repository, accept the PR if you are using this approach, and check the triggered action.
 
 Once the action has been executed, you can connect to the [NAPPTIVE Playground](https://playground.napptive.dev) and you will see your application running. Now try to change the message in [cmd/cd-example/main.go:31](cmd/cd-example/main.go)
 
-```
+```bash
 const (
-	// DefaultPort where the HTTP server will be launched.
-	DefaultPort = 8080
-	// DefaultMessage to be returned on HTTP calls.
-	DefaultMessage = "Hello from version %s commit %s"
+  // DefaultPort where the HTTP server will be launched.
+  DefaultPort = 8080
+  // DefaultMessage to be returned on HTTP calls.
+  DefaultMessage = "Hello from version %s"
 )
 ```
 
