@@ -19,6 +19,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"text/template"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
@@ -28,17 +29,15 @@ const (
 	// DefaultPort where the HTTP server will be launched.
 	DefaultPort = 8080
 	// DefaultMessage to be returned on HTTP calls.
-	DefaultMessage = "Hello from version %s commit %s"
+	// Update this text to check updates
+	DefaultMessage = "Hello from version: %s."
 )
 
 // Version of the command
 var Version string
 
-// Commit from which the command was built
-var Commit string
-
 func main() {
-	log.Info().Str("version", Version).Str("commit", Commit).Msg("application information")
+	log.Info().Str("version", Version).Msg("application information")
 	server := SimpleHTTPServer{}
 	if err := server.Launch(); err != nil {
 		log.Error().Err(err).Msg("server failed")
@@ -51,7 +50,8 @@ type SimpleHTTPServer struct {
 // Launch the HTTP server.
 func (s *SimpleHTTPServer) Launch() error {
 	router := mux.NewRouter()
-	router.HandleFunc("/", s.HelloHandler)
+	router.HandleFunc("/hello", s.HelloHandler)
+	router.HandleFunc("/", s.IndexHandler)
 	listenAddress := fmt.Sprintf(":%d", DefaultPort)
 	srv := &http.Server{
 		Handler: router,
@@ -64,5 +64,22 @@ func (s *SimpleHTTPServer) Launch() error {
 // HelloHandler will return 200 OK plus a message.
 func (s *SimpleHTTPServer) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, fmt.Sprintf(DefaultMessage, Version, Commit))
+	fmt.Fprintf(w, DefaultMessage, Version)
+}
+
+func (s *SimpleHTTPServer) outputHTML(w http.ResponseWriter, filename string, data interface{}) {
+	t, err := template.ParseFiles(filename)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if err := t.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+}
+
+func (s *SimpleHTTPServer) IndexHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	s.outputHTML(w, "./assets/index.gohtml", "")
 }
