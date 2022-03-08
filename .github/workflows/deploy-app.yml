@@ -1,5 +1,5 @@
 name: Publish docker image, push into the catalog and update the deployed application
-# Uncommment thi to launch the workflow manually.
+# Uncommment this to launch the workflow manually.
 #on: workflow_dispatch
 on:
   push:
