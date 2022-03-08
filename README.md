@@ -103,11 +103,11 @@ For the [GitHub Action](https://github.com/features/actions), we define one that
 
 * **Publish docker images and create manifest** builds the docker image and pushes it to [Docker Hub](hub.docker.com) using your credentials. The action expect the credentials to be stored in secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`. After that, builds the YAML files that are required to deploy the application. This operation uses two environment variables `VERSION` and `TARGET_DOCKER_REGISTRY` to define where the image will be pushed and which version will be associated with the upload. **Edit the action code to substitute the value with your user.***
 
-* **Push the application to the catalog** upload the new application to Napptive Catalog using `napptive-actions/catalog-push-action@v2.2.2` action
+* **Push the application to the catalog** upload the new application to Napptive Catalog using `napptive-actions/catalog-push-action@v2.2.4` action
 
-* **Check the application** Checks if the applcation is already deployed using `napptive-actions/playground-github-action@v2.2.2` action.
+* **Check the application** Checks if the applcation is already deployed using `napptive-actions/playground-github-action@v2.2.4` action.
 
-* **Deploy the application** If the application is not deployed yet, deploy it using `napptive-actions/playground-github-action@v2.2.2` action.
+* **Deploy the application** If the application is not deployed yet, deploy it using `napptive-actions/playground-github-action@v2.2.4` action.
 
 * **Update the application** If the application already exists, update it to the new version invoking the [update.sh](scripts/update.sh) script.
 
