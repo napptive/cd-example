@@ -53,6 +53,10 @@ jobs:
       found: ${{ steps.found.outputs.found }}
     
     steps:
+    
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
       - name: Check if the app exists        
         uses: napptive-actions/playground-github-action@v2.2.4
         continue-on-error: true
