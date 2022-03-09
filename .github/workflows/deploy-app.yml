@@ -53,6 +53,10 @@ jobs:
       found: ${{ steps.found.outputs.found }}
     
     steps:
+    
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
       - name: Check if the app exists        
         uses: napptive-actions/playground-github-action@v2.2.4
         continue-on-error: true
@@ -135,8 +139,8 @@ jobs:
         VERSION: ${{ steps.version.outputs.version }}
 
   deploy-app:
-    name: Deploy application
-    needs: check-app
+    name: Deploy application from catalog
+    needs: [check-app, push-to-catalog]
     runs-on: ubuntu-latest
     if: ${{needs.check-app.outputs.not-found == 'true'}}
     steps: 
@@ -144,16 +148,11 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
-    - name: Get k8sfiles
-      uses: actions/cache@v2
-      id: cache-k8s
-      with:
-        path: ./build/*
-        key: k8s-yaml-${{ github.sha }}
-
-    # create it!
-    - name: Deploy the app       
-      uses: napptive-actions/playground-github-action@v2.2.4
-      with:
-        cmd: "apps deploy ./build/k8s/" 
-  
+    - name: Get Version
+      id: get-version
+      run: echo "::set-output name=version::$(cat version)"
+    
+    - name: Deploy the app from the catalog
+      uses: napptive-actions/catalog-deploy-action@v2.2.4
+      with:        
+        appName: napptive/cd-example:${{ steps.get-version.outputs.version }}
