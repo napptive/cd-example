@@ -101,7 +101,7 @@ For the [GitHub Action](https://github.com/features/actions), we define one that
 
 * **Setup Go environment** and **Checkout code** are standard operations to get the code that has been submitted on an environment with the required development tools.
 
-* **Publish docker images and create manifest** builds the docker image and pushes it to [Docker Hub](hub.docker.com) using your credentials. The action expect the credentials to be stored in secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`. After that, builds the YAML files that are required to deploy the application. This operation uses two environment variables `VERSION` and `TARGET_DOCKER_REGISTRY` to define where the image will be pushed and which version will be associated with the upload. **Edit the action code to substitute the value with your user.***
+* **Publish docker images and create manifest** builds the docker image and pushes it to [Docker Hub](hub.docker.com) using your credentials. The action expect the credentials to be stored in secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`. After that, builds the YAML files that are required to deploy the application. This operation uses three environment variables `VERSION`, `PLAYGROUND_ACCOUNT_NAME` and `TARGET_DOCKER_REGISTRY` to define where the image will be pushed and which version will be associated with the upload. **Edit the action code to substitute the value with your user.***
 
 * **Push the application to the catalog** upload the new application to Napptive Catalog using `napptive-actions/catalog-push-action@v2.2.4` action
 
@@ -121,7 +121,7 @@ The result of the workflow is:
 2. Edit [go.mod](go.mod) and replace `github.com/napptive/cd-example` with `github.com/<your_username>/cd-example`.
 3. Generate a [Personal Access Token](https://docs.napptive.com/guides/04.5.Using_personal_access_tokens.html) and save the results in a secret called `PLAYGROUND_PAT`. Make sure the repository can access the value of the secret in case you are using an organization one.
 4. Generate Docker [Access Tokens](https://docs.docker.com/docker-hub/access-tokens/) and store the resulting values in two secrets: `DOCKER_HUB_USER` and `DOCKER_HUB_TOKEN`.
-5. Edit [.github/workflows/deploy-app.yml](.github/workflows/deploy-app.yml) and modify the value of `TARGET_DOCKER_REGISTRY` with your docker username.
+5. Edit [.github/workflows/deploy-app.yml](.github/workflows/deploy-app.yml) and modify the value of `TARGET_DOCKER_REGISTRY` with your docker username, and `PLAYGROUND_ACCOUNT_NAME` with your Playground account name.
 6. Submit your changes to your repository, accept the PR if you are using this approach, and check the triggered action.
 
 Once the action has been executed, you can connect to the [NAPPTIVE Playground](https://playground.napptive.dev) and you will see your application running. Now try to change the message in [cmd/cd-example/main.go:31](cmd/cd-example/main.go)
