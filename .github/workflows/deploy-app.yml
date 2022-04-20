@@ -6,6 +6,8 @@ on:
     branches: [main]
 env:
   PLAYGROUND_PAT: ${{ secrets.PLAYGROUND_PAT}}
+  PLAYGROUND_ACCOUNT_NAME: napptive # TODO: Change with your Playground account name.
+  TARGET_DOCKER_REGISTRY: napptive # TODO: Change this with your docker account name.
 jobs:
   build:
     name: Push docker images
@@ -17,26 +19,16 @@ jobs:
           go-version: ^1.15
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
-      # Docker Login
       - name: Docker Login
         uses: docker/login-action@v1
         with:
           username: ${{secrets.DOCKER_HUB_USER}}
           password: ${{secrets.DOCKER_HUB_TOKEN}}
-      
-      # Build and push docker images
       - name: Build and push Docker images
         run: make docker-push
-        env:
-          TARGET_DOCKER_REGISTRY: napptive
-      
-      # Build k8s yaml
       - name: Render Kubernetes OAM files
         run: make k8s
-        env:
-          TARGET_DOCKER_REGISTRY: napptive  
-
-      # Create a cache  
+      # Create a cache with the generated files
       - name: Uploading manifest
         id: cache-k8s
         uses: actions/cache@v2
@@ -51,24 +43,19 @@ jobs:
     outputs:
       not-found: ${{ steps.not-found.outputs.not-found }}
       found: ${{ steps.found.outputs.found }}
-    
     steps:
-    
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
-
       - name: Check if the app exists        
         uses: napptive-actions/playground-github-action@v2.2.4
         continue-on-error: true
         id: check
         with:
           cmd: "apps info cd-example"
-
       - name: Set App not found
         id: not-found
         run: echo '::set-output name=not-found::true'
         if: steps.check.outcome != 'success'
-
       - name: Set App found
         id: found
         run: echo '::set-output name=found::true'
@@ -81,23 +68,20 @@ jobs:
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-
     - name: Get k8sfiles
       uses: actions/cache@v2
       id: cache-k8s
       with:
         path: ./build/*
         key: k8s-yaml-${{ github.sha }}
-
     - name: Get Version
       id: version
       run: echo "::set-output name=version::$(cat version)"
-    
     - name: Push the application on the catalog
       uses: napptive-actions/catalog-push-action@v2.2.4
       with:
         applicationPath: ./build/k8s/
-        namespace: "napptive"
+        namespace: ${{ env.PLAYGROUND_ACCOUNT_NAME }}
         applicationName: "cd-example"
         tag: ${{ steps.version.outputs.version }}
 
@@ -105,37 +89,29 @@ jobs:
     name: Update application
     needs: check-app
     runs-on: ubuntu-latest
+    # if the application aready exists -> update it
     if: ${{needs.check-app.outputs.found == 'true'}}
     steps:     
-
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-    
     - name: Get k8sfiles
       uses: actions/cache@v2
       id: cache-k8s
       with:
         path: ./build/
         key: k8s-yaml-${{ github.sha }}
-    
-    # if the application aready exists -> update it
     - name: Make scripts executable
       run: chmod +x ./scripts/*.sh
-
     - name: Get Kubeconfig      
       uses: napptive-actions/playground-github-action@v2.2.4
       with:
         cmd: "get-kubeconfig" 
-
-    # Get version
     - name: Get Version
       id: version
       run: echo "::set-output name=version::$(cat version)"
-    
     - name: Deploy new version of the application
       run: ./scripts/update.sh
       env:
-        TARGET_DOCKER_REGISTRY: napptive
         VERSION: ${{ steps.version.outputs.version }}
 
   deploy-app:
@@ -144,15 +120,15 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{needs.check-app.outputs.not-found == 'true'}}
     steps: 
-
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-
     - name: Get Version
       id: get-version
       run: echo "::set-output name=version::$(cat version)"
-    
+    - name: Set catalog qualified application name
+      id: appname
+      run: echo "::set-output name=appname::${PLAYGROUND_ACCOUNT_NAME}/cd-example:${{ steps.get-version.outputs.version }}"
     - name: Deploy the app from the catalog
       uses: napptive-actions/catalog-deploy-action@v2.2.4
       with:        
-        appName: napptive/cd-example:${{ steps.get-version.outputs.version }}
+        appName: ${{ steps.appname.outputs.appname }}
